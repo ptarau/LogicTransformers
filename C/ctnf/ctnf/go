@@ -1,0 +1,4 @@
+rm -f ctnf
+gcc -DNEDEBUG -O3 -o ctnf -lm *.c
+time ctnf
+

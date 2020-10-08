@@ -1,0 +1,4 @@
+rm -f ctnf
+clang -O3 -o ctnf -lm *.c
+time ctnf
+

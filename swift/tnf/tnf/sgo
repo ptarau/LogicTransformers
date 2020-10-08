@@ -1,0 +1,3 @@
+rm -f tnf
+swiftc -Ounchecked   -o tnf -remove-runtime-asserts main.swift
+time tnf

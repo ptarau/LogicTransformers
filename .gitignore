@@ -127,3 +127,20 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+C/bnf/bnf/bnf
+C/tnf/tnf/tnf
+C/ctnf/ctnf/ctnf
+C/bnf/bnf.xcodeproj
+C/tnf/tnf.xcodeproj
+C/ctnf/ctnf.xcodeproj
+
+CPP/tnf/tnf/tnf
+CPP/tnf/tnf.xcodeproj
+
+swift/tnf/tnf.xcodeproj
+
+out/*.txt
+.idea/*
+
+

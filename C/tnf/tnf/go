@@ -1,0 +1,4 @@
+rm -f tnf
+gcc -O3 -o tnf -lm *.c
+time tnf
+
