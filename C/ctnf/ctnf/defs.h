@@ -6,11 +6,13 @@
 #include <string.h>
 #include <assert.h>
 
+static char* fname="/Users/tarau/Desktop/sit/LogicTransformers/out/tnf_asm.txt";
+
 #define MAXHEAP (1L<<32)
 
 //*************************
 
-//#define GC_ON
+// #define GC_ON
 
 #ifdef GC_ON /* ----------------------- WITH GC ENABLED ------------ */
 #include "/usr/local/include/gc/gc.h"
@@ -30,6 +32,6 @@
 
 typedef void *Any;
 
-static char* fname="/Users/tarau/Dropbox/go/lit/py/out/tnf_asm.txt";
+
 
 #endif /* defs_h */

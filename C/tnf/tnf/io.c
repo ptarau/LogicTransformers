@@ -101,6 +101,7 @@ char **file2toks(char *fname) {
       j=0;
     }
     else {
+      //printf("tok %c\n",tok[j]);
       tok[j++]=c;
     }
   }

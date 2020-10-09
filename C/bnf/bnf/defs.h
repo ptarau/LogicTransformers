@@ -6,6 +6,9 @@
 #include <string.h>
 #include <assert.h>
 
+static char* fname="../../../out/bnf_asm.txt";
+//static char* fname="/Users/tarau/Desktop/sit/LogicTransformers/out/bnf_asm.txt";
+
 typedef unsigned long term;
 
 #define MAXHEAP (1L<<32)
@@ -32,6 +35,6 @@ typedef unsigned long term;
 
 typedef void *Any;
 
-static char* fname="/Users/tarau/Dropbox/go/lit/py/out/bnf_asm.txt";
+
 
 #endif /* defs_h */

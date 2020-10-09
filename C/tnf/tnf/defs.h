@@ -6,11 +6,19 @@
 #include <string.h>
 #include <assert.h>
 
+#define XCODE
+
+#ifdef XCODE
+static char* fname="/Users/tarau/Desktop/sit/LogicTransformers/out/tnf_asm.txt";
+#else
+static char* fname="../../../out/tnf_asm.txt";
+#endif
+
 #define TR (1)
 
 #define DEB (1)
 
-#define GC_ON
+// #define GC_ON
 
 
 
@@ -38,7 +46,5 @@
 
 
 typedef void *Any;
-
-static char* fname="/Users/tarau/Dropbox/go/lit/py/out/tnf_asm.txt";
 
 #endif /* defs_h */

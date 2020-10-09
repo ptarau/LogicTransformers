@@ -315,7 +315,7 @@ function activate(ts,k,vs)
    ts[1],nv(ts[2],k,vs),nv(ts[3],k,vs),nv(ts[4],k,vs)
 end
 
-function tload(fname = "/Users/tarau/Dropbox/go/lit/py/out/tnf_asm.txt")
+function tload(fname = "../out/tnf_asm.txt")
     lines = readlines(fname)
     st=new_st()
     code=[]
