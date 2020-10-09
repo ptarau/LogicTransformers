@@ -1,4 +1,44 @@
 rm -f out/tnf_asm.*
+
+echo
+echo "SWI ---------------"
 time swipl -s tnf.pro -g "run_orig('progs/$1.pro'),halt"
+echo "SWI VM --------------"
 time swipl -s tnf.pro -g "run('progs/$1.pro'),halt"
+
+echo
+echo "Pyhton VM -------------"
 time python3 -O tnf.py
+echo "Pyhton VM, with PyPy"
+time PyPY -O tnf.py
+
+pushd .
+cd C/tnf/tnf/
+echo
+echo
+echo "C VM -----------------"
+./go
+popd
+
+pushd .
+cd C/ctnf/ctnf/
+echo
+echo
+echo "C VM, ALTERNATIVE ---------------"
+./go
+popd
+
+pushd .
+cd swift/tnf/tnf/
+echo
+echo
+echo "SWIFT VM -------------------------- "
+./sgo
+popd
+pushd .
+cd julia/
+echo
+echo
+echo "JULIA VM --------------- "
+time julia tnf.jl
+popd

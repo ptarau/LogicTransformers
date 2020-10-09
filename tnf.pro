@@ -478,7 +478,7 @@ call_tnf(Goal):-
   term_variables(Goal,Vars),
   copy_term(Goal:Vars,G:Xs),
   cls2tnf((query(Xs):-G),(p(_V):-Body)),
-  portray_clause('CALLING':Body),
+  %portray_clause('CALLING':Body),
   call(Body),
   maplist(toTerm,Xs,Vars).
 

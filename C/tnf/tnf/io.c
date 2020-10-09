@@ -79,7 +79,7 @@ void ppc(stack clause) {
   long l=size(clause);
   for(long i=0; i<l; i++) {
     instr ins = at(clause,i);
-    printf("INSTR: ");ppi(ins);n();
+    //printf("INSTR: ");ppi(ins);n();
   }
 }
 

@@ -342,11 +342,11 @@ function tload(fname = "../out/tnf_asm.txt")
         vs=[]
         for x in c
             #println('X',deref(x[1]))
-            pti(x)
+            #pti(x)
             a=activate(x,100,vs)
 
         end
-        println("count: i=",i," var count=",count) #;ptrail(vs)
+        #println("count: i=",i," var count=",count) #;ptrail(vs)
     end
 
     code
