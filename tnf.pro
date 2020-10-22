@@ -539,6 +539,22 @@ nv(X):-numbervars(X,0,_).
 term_ex(f(X,g(X,Y),Y)).
 
 pred_ex((a(f(X)):-b(c,X),d(g(X)))).
+
+
+bb_encode(A,Ns,Vs):-
+  findall(N,to_bbin(A,N),Ns),
+  to_leaves(A,Vs,[]).
+
+to_bbin(A,N):-(atomic(A);var(A)),!,N=1.
+to_bbin(A=>B,N):-
+    to_bbin(A,NA),N is 2*NA
+  ; to_bbin(B,NB),N is 2*NB+1.
+
+
+to_leaves(A)-->{atomic(A);var(A)},!,[A].
+to_leaves(A=>B)-->to_leaves(A),to_leaves(B).
+
+
 /*
 ?- term_ex(T),fromTerm(T,BT),nv(T).
 T = f(A, g(A, B), B),
