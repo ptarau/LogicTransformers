@@ -7,7 +7,7 @@
 #include "io.h"
 #include "istack.h"
 
-void t3a() {
+void t3a(void) {
   printf("\nt3a\n");
   char **toks=file2toks(fname);
   printf("FIRST:%s\n",toks[0]);
@@ -25,7 +25,7 @@ void t3a() {
   printf("code len=%d\n",i);
 }
 
-void t3() {
+void t3(void) {
   printf("\nt3\n");
   struct rets r;
   file2code(fname,&r);
@@ -34,7 +34,7 @@ void t3() {
 }
 
 
-void stack_test() {
+void stack_test(void) {
   printf("\nstack_test\n");
   stack s=newStack();
   push(s,"hello");

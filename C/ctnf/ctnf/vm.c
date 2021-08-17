@@ -192,7 +192,7 @@ void unwind(istack trail,long ttop) {
 static term vars[MAXVARS];
 //static term *vars;
 
-void initVars() {
+void initVars(void) {
   //vars=XALLOC(MAXVARS,term);
   for(int i=0;i<MAXVARS;i++) {
     vars[i]=NIL;
@@ -300,7 +300,7 @@ action step(term G,long i,stack code,istack trail,
   return NULL; //newAction(FAIL,NIL,NIL,0,0,NIL);
 }
 
-term getGoal() {
+term getGoal(void) {
   term answer=var();
   term cont=var();
   term goal=atom(0);
