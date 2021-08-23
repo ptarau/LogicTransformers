@@ -231,7 +231,7 @@ term stack2tree(stack postfix,Dict vars,stack vnames,term *neck) {
 }
 
 
-stack tload() {
+stack tload(void) {
   stack wss=file2wss(fname);
   term l=size(wss);
   stack cs=newStack();
