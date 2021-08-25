@@ -91,7 +91,8 @@ def pt(a,size=200) :
     if t == PAIR:
       u, v = x
       k -= 1
-      return f'({pt0(u, k)}=>{pt0(v, k)})'
+      #return f'({pt0(u, k)}=>{pt0(v, k)})'
+      return str(pt0(u, k))+'=>'+str(pt0(v, k))
     elif t == VAR:
       if len(x) == 2:
         return str(x[1])
