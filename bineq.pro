@@ -81,7 +81,7 @@ eqs2trips([(X=T)|Es])-->
   eqs2trips(Es).
 
 eq2trips(X,T)-->{compound(T)},!,
-  {functor(T,F0,N),Size is N+2,
+  {functor(T,F0,N),Size is N+1,
   (F0==('[|]')->F=('.');F=F0)
   },
   [w(Size,X),b(1,X,F)],
@@ -135,8 +135,8 @@ p(T):-
   %ppp('!!!'+T),nl,
   d(T).
 
-r(N,T):-N1 is N-1,functor(T,'$',N1).
-w(N,T):-N1 is N-1,functor(T,'$',N1).
+r(N,T):-functor(T,'$',N).
+w(N,T):-functor(T,'$',N).
 
 %arg0(I,T,A):-succ(I,SI),arg(SI,T,A).
 
@@ -173,7 +173,7 @@ run:-
   doit((
     d(T),
     nonvar(X),
-    ppp(X),
+    %ppp(X),
     true
   )).
 

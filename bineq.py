@@ -80,44 +80,42 @@ def atom(s):
     assert isinstance(s, str)
     return sym(s), CONST
 
-
 def var(x):
     assert x is None or isinstance(x, int)
     return (x, VAR)
 
+def arg(i):
+    assert isinstance(i, int)
+    return i,INT
 
-def put_fun(n, ft):
+
+def put_fun(n):
     n = as_val(n)
-    ft = as_val(ft)
     h = len(heap)
-    heap.append((n[0], ARITY))
-    heap.append(ft)
+    heap.append(arity(n[0]))
     heap.extend([var(None)] * n[0])
-    return arity(h)
+    return var(h)
+
+
+def get_fun(n_, v):
+    n, _ = as_val(n_)
+    v = as_var(v)
+    r, t = get_val(v)
+    assert t == ARITY
+    return n == r
 
 
 def put_arg(i_, h_, x):
-    i, ti = i_
-    h, th = h_
-    assert VAR == ti
-    assert VAR == th
+    i, ti = as_val(i_)
+    h, th = as_var(h_)
     hi = h + i
     heap[hi] = x
     return var(hi)
 
 
-def get_fun(n, ft):
-    n = as_val(n)
-    ft = as_val(ft)
-    h = len(heap)
-    heap.append((n[0], ARITY))
-    heap.append(ft)
-    heap.extend([var(None)] * n[0])
-    return arity(h)
-
 def unify_arg(i_, h_, x, trail, htop):
     i, ti = as_val(i_)
-    h, th = as_val(h_)
+    h, th = as_var(h_)
     assert VAR == ti
     assert VAR == th
     y = heap[h + i]
@@ -125,6 +123,7 @@ def unify_arg(i_, h_, x, trail, htop):
 
 
 def as_val(v):
+    print('@@@',v)
     assert isinstance(v, tuple)
     assert len(v) == 2
     assert isinstance(v[0], int) or isinstance(v[0], str)
@@ -221,31 +220,6 @@ def trim_heap(htop):
         heap.pop()
 
 
-def get_goal():
-    h = put_fun((2, 'ARITY'), ('goal', CONST))
-    return h
-
-
-def activate(G, clause, trail, ttop, htop):
-    hb, ctag = clause.c
-
-    ok = unify(left(hb), G, trail, htop)
-    unwind(trail, ttop)
-    if not ok: return False
-
-    begin = clause.begin
-    end = clause.end
-    h = htop - begin
-
-    for j in range(begin, end):
-        x, t = heap[j]
-        if CONST == t:
-            heap.append((x, t))
-        else:
-            heap.append((x + h, t))
-    r = h + hb, ctag
-    return r
-
 
 FAIL, DO, DONE, UNDO = 0, 1, 2, 3
 
@@ -281,6 +255,12 @@ def step(G, code, trail, goal, i):
                 return (DO, (NewG, G), ttop, htop, i)
     return (FAIL, None, ttop, htop, i)
 
+def get_goal():
+    h=put_fun(arity(2))
+    put_arg(arg(1),h,atom('goal'))
+    put_arg(arg(2),h,var(None))
+    return h
+
 
 # code interpreter
 def interp():
@@ -295,6 +275,7 @@ def interp():
         op, G, ttop, htop, i = todo.pop()
         if DO == op:
             (NewG, OldG) = G
+            print("$$$$ G=",G)
             if i < l: ensure_undo(OldG, todo, ttop, htop, i, l);
             todo.append(step(NewG, code, trail, goal, 0))
 
