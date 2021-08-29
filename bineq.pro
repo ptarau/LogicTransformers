@@ -6,7 +6,7 @@ c:-make.
 
 ppp(X):-portray_clause(X).
 
-do(X):-X,fail;true.
+doit(X):-X,fail;true.
 
 
 %% binarization : a continuation passing form
@@ -81,8 +81,10 @@ eqs2trips([(X=T)|Es])-->
   eqs2trips(Es).
 
 eq2trips(X,T)-->{compound(T)},!,
-  {functor(T,F,N)},
-  [f(N,X,F)],
+  {functor(T,F0,N),N1 is N+1,
+  (F0==('[|]')->F=('.');F=F0)
+  },
+  [w(N1,X),b(1,X,F)],
   args2trips(X,T,1,N).
 eq2trips(X,X)-->[].
 
@@ -90,21 +92,26 @@ eq2trips(X,X)-->[].
 args2trips(_X,_T,I,N)-->{I>N},!.
 args2trips(X,T,I,N)-->{I>0},
   {arg(I,T,A)},
-  [a(I,X,A)],
   {J is I+1},
+  [b(J,X,A)],
   args2trips(X,T,J,N).
 
 
 term2chain(T,H,Bs):-
   term2eqs(H,T,Es),
+  writeln('!!! EQS:'),ppp(H:-Es),
   eqs2trips(Es,Bs,[]).
 
+to_head_eqs([],[]).
+to_head_eqs([w(A,B)|Es],[r(A,B)|Hs]):-to_head_eqs(Es,Hs).
+to_head_eqs([b(A,B,C)|Es],[u(A,B,C)|Hs]):-to_head_eqs(Es,Hs).
 
 clause2chain(C,Is):-
   to_bin(C,(X:-Y)),
-  term2chain(X,H,Xs),
+  term2chain(X,H,Xs0),to_head_eqs(Xs0,Xs),
   term2chain(Y,B,Ys),
-  append([[d(H)],Xs,Ys,[p(B)]],Is).
+  append([d(H)|Xs],Ys,Zs),
+  append(Zs,[p(B)],Is).
 
 
 %% returns clauses in file, one at a time
@@ -122,28 +129,36 @@ file2chain-->
   clause2chain.
 
 
-p(true):-!.
+%p(X):-writeln('!!!!!:'=X),fail.
+p(V):-var(V),!.
 p(T):-
   %ppp('!!!'+T),nl,
   d(T).
 
-f(N,T,F):-functor(T,F,N).
+r(N,T):-functor(T,'$',N).
+w(N,T):-functor(T,'$',N).
 
-a(I,T,A):-arg(I,T,A).
+%arg0(I,T,A):-succ(I,SI),arg(SI,T,A).
+
+u(I,T,A):-arg(I,T,A).
+b(I,T,A):-arg(I,T,A).
 
 :-dynamic(d/1).
 
 file2db(F):-
   abolish(d/1),
-  do((
+  doit((
     file2chain(F,[H|Is]),
     list2conj(Is,Bs),
     assertz((H:-Bs))
   )).
 
+
+% tests
+
 go1:-
   F='progs/plain.pro',
-  do((
+  doit((
     file2chain(F,[I|Is]),
     ppp((I:-Is))
   )).
@@ -154,18 +169,40 @@ comp(F):-
   listing(d/1).
 
 run:-
-  T=goal(X,true),
-  do((
+  T='$'(goal,X,_),
+  doit((
     d(T),
-    %ppp(X),
+    nonvar(X),
+    ppp(X),
     true
   )).
 
+save:-
+  doit((
+    clause(d(H),Bs),
+    conj2list(Bs,Ls),
+    Xs=[d(H)|Ls],
+    numbervars(Xs,0,_),
+    doit((
+      member(T,Xs),
+      T=..Os,
+      doit((
+        member(O,Os),
+        write(O),write(' ')
+      )),
+      nl
+    ))
+    ,nl
+  )).
 
-go:-
-  F='progs/queens.pro',
+go(F):-
+  %F='progs/queens.pro',
+  %atom_concat(['progs/',F0,'.pro'],F)
   comp(F),
-  time(run).
+  time(run),
+  tell('out/bineq_asm.txt'),
+  save,
+  told.
 
 
 /*
@@ -176,4 +213,6 @@ R =  (a(_4274):-b(c(d(_4274)))).
 ?- to_bin((a:-[]),R).
 R =  (a(_3492):-_3492).
 
+?-F='progs/queens.pro',go(F).
+....
 */
