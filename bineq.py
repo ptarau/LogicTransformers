@@ -10,7 +10,7 @@ def load(fname='out/bineq_asm.txt'):
             try:
                 return tag(float(x), FLOAT)
             except ValueError:
-                return tag(x,CONST)
+                return tag(x, CONST)
 
     with open(fname, 'r') as f:
         txt = f.read()
@@ -27,15 +27,13 @@ def load(fname='out/bineq_asm.txt'):
                 if x in vs:
                     v = vs[x]
                 else:
-                    v = tag(len(vs),VAR)  # , x
+                    v = tag(len(vs), VAR)  # , x
                     vs[x] = v
                 xs[j] = v
             elif x[0] == "_":
-                v = tag(len(vs),VAR),  # x
+                v = tag(len(vs), VAR),  # x
                 vs[x] = v
                 xs[j] = v
-            elif x == '[|]':
-                xs[j] = to_const('.')
             else:
                 xs[j] = to_const(x)
 
@@ -96,56 +94,60 @@ def vset(h, x):
     heap[h] = x
 
 
-def put_size(arity):
+def put_size(arity, v, regs):
     h = len(heap)
     n = val(arity)
     heap.append(arity)
-    heap.extend([tag(None, VAR)] * n)
-    return tag(h, VAR)
+    for i in range(1, n + 1):
+        heap.append(tag(h + i, VAR))
+    regs[val(v)] = h
 
 
-def get_size(arity, v):
+def get_size(arity, v, regs):
     n = val(arity)
-    m = val(v)
-    t = tag_of(v)
-    return ARITY == t and n == m
+    other = heap[regs[val(v)]]
+    m = val(other)
+    return n == m
 
 
-def put_arg(i_, h_, x):
+def put_arg(i_, v, x, regs):
     i = val(i_)
-    ti = tag_of(i_)
-    h = val(h_)
-    th = tag_of(h_)
-    assert INT == ti
-    assert VAR == th
+    h = regs[val(v)]
     hi = h + i
     vset(hi, x)
 
 
-def unify_arg(i_, h_, x, trail, htop):
+def unify_arg(i_, v_, x, trail, htop, regs):
     i = val(i_)
-    ti = tag_of(i_)
-    h = val(h_)
-    th = tag_of(h_)
-    assert INT == ti
-    assert VAR == th
+    v = val(v_)
+    assert v is not None
+    h = regs[v]
     hi = h + i
     y = vget(hi)
     return unify(x, y, trail, htop)
 
+def get_var(v_,regs) :
+    v = val(v_)
+    assert v is not None
+    h = regs[v]
+    y = vget(h)
+    return y
+
+
 
 def deref(o):
     while True:
-        x, tx = o
-        if tx == VAR:
+        x, t = o
+        if t == VAR:
             v, tv = vget(x)
-            if v is None:
+            if v == x:
                 assert VAR == tv
                 return o
             if VAR == tv and v > x:
                 print('DEREF:', v, '>', x)
                 assert v < x
             o = v, tv
+
         else:
             return o
 
@@ -208,25 +210,70 @@ FAIL, DO, DONE, UNDO = 0, 1, 2, 3
 
 
 def step(G, code, trail, goal, i):
-    l = len(code)
+    cl = len(code)
     htop = len(heap)
     ttop = len(trail)
     G = deref(G)
-    assert G[0] < htop
-    while i < l:
+    assert val(G) < htop
+    while i < cl:
         unwind(trail, ttop)
         trim_heap(htop)
         clause = code[i]
         i += 1
-        print(clause)
+        regs = [None] * len(clause)
+        for j, instr in enumerate(clause):
+            op = instr[0]
+            x = instr[1]
+            if 'd' == op:
+                regs[0] = val(x)
+
+            elif 'r' == op:
+                v = instr[2]
+                if not get_size(x, v, regs):
+                    if j == 1:
+                        print('FAILING cls =', i, deref(v))
+                        break
+                    print('SUCCEDS cls = ',i )
+                    put_size(x, v, regs)
+
+            elif 'u' == op:
+                print(op, x, instr[2], instr[3])
+                if not unify_arg(x, instr[2], instr[3], trail, htop, regs):
+                    break
+
+            elif 'w' == op:
+                print(op, x)
+                v = instr[2]
+                put_size(x, v, regs)
+
+            elif 'b' == op:
+                # put_arg(i_, h_, x):
+                print(op, x, instr[2], instr[3])
+                put_arg(x, instr[2], instr[3], regs)
+
+            else:
+                assert 'p' == op
+                v=instr[1]
+
+                y=get_var(v,regs)
+                print(op, v, 'y:',y)
+
+                NewG = deref(y)
+                if VAR == tag_of(NewG):
+                    return (DONE, G, ttop, htop, i)
+                else:
+                    print('HERE:',NewG)
+                    return (DO, (NewG, G), ttop, htop, i)
     return (FAIL, None, ttop, htop, i)
 
 
 def get_goal():
-    h = put_size(tag(2,ARITY))
-    put_arg(tag(1,INT), h, tag('goal',CONST))
-    put_arg(tag(2,INT), h, tag(None,VAR))
-    return h
+    h = len(heap)
+    heap.append(tag(3, ARITY))
+    heap.append(tag('goal', CONST))
+    heap.append(tag(2, VAR))
+    heap.append(tag(3, VAR))
+    return tag(h, VAR)
 
 
 # code interpreter
@@ -234,32 +281,40 @@ def interp():
     goal = get_goal()
     code = load()
     # pc(code)
-    l = len(code)
+    cl = len(code)
     trail = []
-    todo = [(DO, (goal, None), 0, len(heap), l)]
+    todo = [(DO, (goal, None), 0, len(heap), cl)]
 
+    fuel = 20
     while (todo):
+        fuel-=1
+        if fuel == 0:
+            print('EXITING')
+            return
+
+        print("TODO:", todo)
         op, G, ttop, htop, i = todo.pop()
         if DO == op:
             (NewG, OldG) = G
-            print("$$$$ G=", G)
-            if i < l: ensure_undo(OldG, todo, ttop, htop, i, l)
+
+            if i < cl: ensure_undo(OldG, todo, ttop, htop, i, cl)
             todo.append(step(NewG, code, trail, goal, 0))
 
         elif DONE == op:
             # yield p(answer)
-            if i < l: ensure_undo(G, todo, ttop, htop, i, l)
+            print("DONE ------------->", G)
+            if i < cl: ensure_undo(G, todo, ttop, htop, i, cl)
 
         elif UNDO == op:
             unwind(trail, ttop)
             trim_heap(htop)
-            if i < l: todo.append(step(G, code, trail, goal, i))
+            if i < cl: todo.append(step(G, code, trail, goal, i))
 
         else:  # FAIL == op:
             pass
 
 
-def ensure_undo(G, todo, ttop, htop, i, l):
+def ensure_undo(G, todo, ttop, htop, i, cl):
     instr = (UNDO, G, ttop, htop, i)
     if todo:
         (op, G1, ttop1, htop1, i1) = todo[-1]
@@ -288,5 +343,5 @@ def ltest():
 
 
 if __name__ == "__main__":
-    ltest()
+    # ltest()
     go()
