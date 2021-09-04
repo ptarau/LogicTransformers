@@ -1,4 +1,4 @@
-DEB = True
+DEBUG = True
 
 
 # load from an "assembler" code file
@@ -61,7 +61,7 @@ def sym(s):
     return i
 
 
-if DEB:
+if DEBUG:
     VAR, ARITY, CONST, INT, FLOAT = 'VAR', 'ARITY', 'CONST', 'INT', 'FLOAT'
     READ, WRITE = 'READ', 'WRITE'
 else:
@@ -106,8 +106,17 @@ def put_size(arity, v, regs):
 def get_size(arity, v, regs):
     n = val(arity)
     other = heap[regs[val(v)]]
+    other = deref(other)
     m = val(other)
-    return n == m
+    ok = n == m and ARITY == tag_of(other)
+    print('@!!!', n, m, ok)
+    return ok
+
+
+def deep_var(v, regs):
+    dv = heap[regs[val(v)]]
+    dv = deref(dv)
+    return VAR == tag_of(dv)
 
 
 def put_arg(i_, v, x, regs):
@@ -126,13 +135,13 @@ def unify_arg(i_, v_, x, trail, htop, regs):
     y = vget(hi)
     return unify(x, y, trail, htop)
 
-def get_var(v_,regs) :
+
+def get_var(v_, regs):
     v = val(v_)
     assert v is not None
     h = regs[v]
-    y = vget(h)
-    return y
-
+    #y = vget(h)
+    return tag(h,VAR)
 
 
 def deref(o):
@@ -213,7 +222,9 @@ def step(G, code, trail, goal, i):
     cl = len(code)
     htop = len(heap)
     ttop = len(trail)
-    G = deref(G)
+    #G = deref(G)
+    print('$$$$$$$$$',G)
+    assert VAR==tag_of(G)
     assert val(G) < htop
     while i < cl:
         unwind(trail, ttop)
@@ -224,21 +235,30 @@ def step(G, code, trail, goal, i):
         for j, instr in enumerate(clause):
             op = instr[0]
             x = instr[1]
+
             if 'd' == op:
-                regs[0] = val(x)
+                assert tag_of(x) == VAR
+                assert tag_of(G) == VAR
+                regs[0] = val(G) # heap addr
+
+                print('!!! REGS0', x,G,regs)
 
             elif 'r' == op:
+                print('r:', instr)
+
                 v = instr[2]
-                if not get_size(x, v, regs):
-                    if j == 1:
-                        print('FAILING cls =', i, deref(v))
-                        break
-                    print('SUCCEDS cls = ',i )
+                if get_size(x, v, regs):
+                    pass
+                elif deep_var(v, regs):
                     put_size(x, v, regs)
+                else:
+                    print('r: FAILED  UNIF', x, v)
+                    break
 
             elif 'u' == op:
                 print(op, x, instr[2], instr[3])
                 if not unify_arg(x, instr[2], instr[3], trail, htop, regs):
+                    print('u: UNIF FAIL:', instr, '\n')
                     break
 
             elif 'w' == op:
@@ -253,16 +273,19 @@ def step(G, code, trail, goal, i):
 
             else:
                 assert 'p' == op
-                v=instr[1]
+                print("LENS heap:", len(heap), '>', htop)
+                v = instr[1]
 
-                y=get_var(v,regs)
-                print(op, v, 'y:',y)
+                y = get_var(v, regs)
+                print(op, '!!!!V', v, 'y:', y)
+                NewG = y
+                print('<<<<<>>>>>', G, NewG, '-------\n')
 
-                NewG = deref(y)
                 if VAR == tag_of(NewG):
+                    print('DONE:', G)
                     return (DONE, G, ttop, htop, i)
                 else:
-                    print('HERE:',NewG)
+                    print('DO:', NewG)
                     return (DO, (NewG, G), ttop, htop, i)
     return (FAIL, None, ttop, htop, i)
 
@@ -278,16 +301,17 @@ def get_goal():
 
 # code interpreter
 def interp():
-    goal = get_goal()
     code = load()
+    goal = get_goal()
+    print('GOAL:', goal, 'htop=', len(heap))
     # pc(code)
     cl = len(code)
     trail = []
     todo = [(DO, (goal, None), 0, len(heap), cl)]
 
-    fuel = 20
+    fuel = 200
     while (todo):
-        fuel-=1
+        fuel -= 1
         if fuel == 0:
             print('EXITING')
             return
@@ -302,7 +326,7 @@ def interp():
 
         elif DONE == op:
             # yield p(answer)
-            print("DONE ------------->", G)
+            print("DONE ------------->", G,deref(G))
             if i < cl: ensure_undo(G, todo, ttop, htop, i, cl)
 
         elif UNDO == op:
@@ -343,5 +367,5 @@ def ltest():
 
 
 if __name__ == "__main__":
-    # ltest()
+    ltest()
     go()
