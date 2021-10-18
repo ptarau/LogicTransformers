@@ -1,23 +1,31 @@
 rm -f out/tnf_asm.*
-
+TMP="tmp.txt"
 echo
 echo "SWI ---------------"
-time swipl -s tnf.pro -g "run_orig('progs/$1.pro'),halt"
+time swipl -s tnf.pro -g "run_orig('progs/$1.pro'),halt" > $TMP
 echo "SWI VM --------------"
-time swipl -s tnf.pro -g "run('progs/$1.pro'),halt"
+time swipl -s tnf.pro -g "run('progs/$1.pro'),halt" > $TMP
+rm -f out/bnf_asm.*
+swipl -s tnf.pro -g "basm('$1','out/bnf_asm.txt'),halt"
 
 echo
-echo "Pyhton VM -------------"
-time python3 -O tnf.py
-echo "Pyhton VM, with PyPy"
-time PyPY -O tnf.py
+echo "Python VM tnf -------------"
+time python3 -O tnf.py > $TMP
+echo "Python VM, with PyPy"
+time pypy3 -O tnf.py > $TMP
+
+echo
+echo "Python VM bnf -------------"
+time python3 -O bnf.py > $TMP
+echo "Python VM, with PyPy"
+time pypy3 -O bnf.py > $TMP
 
 pushd .
 cd C/tnf/tnf/
 echo
 echo
 echo "C VM -----------------"
-./go
+./go > $TMP
 popd
 
 pushd .
@@ -25,20 +33,30 @@ cd C/ctnf/ctnf/
 echo
 echo
 echo "C VM, ALTERNATIVE ---------------"
-./go
+./go > $TMP
 popd
+
+pushd .
+cd C/bnf/bnf/
+echo
+echo
+echo "C VM, bnf BINARIZATION  ---------------"
+./go > $TMP
+popd
+
+
 
 pushd .
 cd swift/tnf/tnf/
 echo
 echo
 echo "SWIFT VM -------------------------- "
-./sgo
+./sgo > $TMP
 popd
 pushd .
 cd julia/
 echo
 echo
 echo "JULIA VM --------------- "
-time julia tnf.jl
+time julia tnf.jl > $TMP
 popd
