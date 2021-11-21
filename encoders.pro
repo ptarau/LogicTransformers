@@ -18,12 +18,19 @@ argx(I,T,F):-arg(I,T,F).
 
 
 etest:-
+  % assumes ground terms
   T=f(a,g(b,h(c),d),e),
   writeln(T),
   term2paths(T,Pss),
   writeln(Pss),
   fail.
 
+
+%%%%%%%%%%
+
+term2vects(T,[As,Cs]):-
+  t2m(T,0, 0,_, Xss,[]),
+  transpose3(Xss,[As,_,Cs]).
 
 term2mat(T,Tss):-
   t2m(T,0, 0,_, Xss,[]),
@@ -51,25 +58,53 @@ split([X,Y,Z],X,Y,Z).
 
 as_pairs([X,Y,Z],X-[Y,Z]).
 
-mat2term(Xss,As_BCss):-
+mat2term(Xss,T):-
   transpose3(ABCs,Xss),
   maplist(as_pairs,ABCs,A_BCs),
-  group_pairs_by_key(A_BCs,As_BCss).
+  group_pairs_by_key(A_BCs,As_BCss),
+  build_term(As_BCss,[0-Xs|_]),
+  T=..Xs.
+
+
+
+build_term([],[]).
+build_term([N-Xs|Xss],[N-Ys|Yss]):-
+  scan_term(Xs,Ys,Xss,NVs,[]),
+  build_term(Xss,Yss),
+  fill_out(NVs,Yss).
+
+fill_out([],_).
+fill_out([N-(F:V)|NVs],Yss):-
+  selectchk(N-Ys,Yss,Zss),
+  V=..[F|Ys],
+  fill_out(NVs,Zss).
+
+scan_term([],[],_)-->[].
+scan_term([[N,F]|Xs],[NewVar|Ys],Xss)-->
+   {memberchk(N-_,Xss)},
+   !,
+   [N-(F:NewVar)],
+   scan_term(Xs,Ys,Xss).
+scan_term([[_N,A]|Xs],[A|Ys],Xss)-->
+    scan_term(Xs,Ys,Xss).
+
+
 
 pq(T):-
   term2mat(T,Pss),
   portray_clause((T:-Pss)),
-  mat2term(Pss,Xss),
-  portray_clause(Xss).
+  mat2term(Pss,TT),
+  writeln('operation reversed:'),
+  portray_clause(TT),
+  nl.
 
 ppp(T):-portray_clause(('!!!':-T)).
 
 mtest:-
   T=f(a,g(b,X,h(c,X,Y),d),e,Y),
-  TT=f(_,g(b,X,_,d),e,_),
+  %TT=f(_,g(b,X,_,d),e,_),
   pq(T),
-  fail,
-  pq(TT),
-  T=TT,
+  %pq(TT),
+  %T=TT,
   pq(T),
   fail.
