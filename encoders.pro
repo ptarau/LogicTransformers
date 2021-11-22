@@ -110,6 +110,17 @@ fill_out([N-(F:V)|NVs],Yss):-
   fill_out(NVs,Zss).
 
 
+
+%%
+
+t2s(T,[As,Ps]):-t2s(T,As,[],Ps,[]).
+
+t2s(A,[A|As],As)-->{atomic(A);var(A)},!,[0,0].
+t2s(T,[F|As],Bs)-->{T=..[F|Xs]},[1],t2ss(Xs,As,Bs).
+
+t2ss([],As,As)-->[2].
+t2ss([X|Xs],As,Cs)-->t2s(X,As,Bs),t2ss(Xs,Bs,Cs).
+
 % tests
 
 pq(T):-
@@ -144,14 +155,33 @@ vtest:-
   T=f(a,g(b,X,h(c,X,Y),d),e,Y),
   TT=f(_,g(b,X,_,d),e,_),
   vq(T),
-  pq(TT),
+  vq(TT),
   T=TT,
   vq(T),
   fail.
 
 
+sq(T):-
+  t2s(T,Pss),
+  portray_clause((T:-Pss)),
+  %t2s(Pss,TT),
+  %writeln('operation reversed:'),
+  %portray_clause(TT),
+  nl.
+
+stest:-
+  T=f(a,g(b,X,h(c,X,Y),d),e,Y),
+  TT=f(_,g(b,X,_,d),e,_),
+  sq(T),
+  sq(TT),
+  T=TT,
+  sq(T),
+  fail.
+
 /*
 
+TODO: single pass vect2term
+TODO: right,down,up,end encoding
 ?- etest.
 f(a,g(b,h(c),d),e)
 [[0,f],[1,a],[2,0,g],[2,1,b],[2,2,0,h],[2,2,1,c],[2,3,d],[3,e]]
