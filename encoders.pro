@@ -68,7 +68,7 @@ as_pairs([X,Y,Z],X-[Y,Z]).
 % rebuilds term from DF codes + syms
 vect2term([Is,Xs],T):-
   length(Is,L),L1 is L-1,
-  numlist(0,L1,Js), % adds ID permuation, befor sort
+  numlist(0,L1,Js), % adds ID permuation, before sort
   transpose3(ABCsUnsorted,[Is,Js,Xs]),
   sort(ABCsUnsorted,ABCs),
   from_transposed(ABCs,T).
@@ -120,6 +120,29 @@ t2s(T,[F|As],Bs)-->{T=..[F|Xs]},[1],t2ss(Xs,As,Bs).
 
 t2ss([],As,As)-->[2].
 t2ss([X|Xs],As,Cs)-->t2s(X,As,Bs),t2ss(Xs,Bs,Cs).
+
+simple(X):-atomic(X),!.
+simple(X):-var(X).
+
+listify(X,R):-simple(X),!,R=s(X).
+listify(T,Rs):-T=..Xs,maplist(listify,Xs,Rs).
+
+
+l2m([],Rs,Rs)-->[].
+l2m(s(X),[X|Rs],Rs)-->[].
+l2m([X|Xs],Rs1,Rs3)-->[0],l2m(X,Rs1,Rs2),[1],l2m(Xs,Rs2,Rs3).
+
+
+l2m(T,[Xs,Ys]):-
+   l2m(T,Xs,[],Ys,[]).
+
+ltest:-
+   T=f(a,g(b,X,h(c,X,Y),d),e,Y),
+   listify(T,Xs),
+   l2m(Xs,[Ls,Rs]),
+   length(Ls,L1),length(Rs,L2),
+   portray_clause((T:-Ls,Rs)),
+   writeln(L1+L2).
 
 % tests
 
