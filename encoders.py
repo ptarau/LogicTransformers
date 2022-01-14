@@ -4,3 +4,4 @@ def simple(x) :
 def dfs(x) :
     
     if is_simple(x):
+        pass
