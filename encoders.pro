@@ -26,6 +26,48 @@ etest:-
   fail.
 
 
+%%%%
+
+term2tab(T,Tabs):-
+  term2paths(T,Pss),
+  maplist(split_path,Pss,Tabs).
+
+split_path(Ps,Label-Val):-
+  Sep='v',
+  append(Qs,[Val],Ps),!,
+  join_with_(Sep,Qs,Rs),
+  atomic_list_concat(Rs,Label).
+
+join_with(Sep,[X|Xs],[X|Rs]):-join_with_(Sep,Xs,Rs).
+
+join_with_(_,[],[]).
+join_with_(Sep,[X|Xs],[Sep,X|Ys]):-join_with_(Sep,Xs,Ys).
+
+ttest:-
+  % assumes ground terms
+  T=f(a,g(b,h(c),d),e),
+  writeln(T),
+  term2tab(T,Tabs),
+  writeln(Tabs),
+  fail.
+
+terms2table(Tss,Rows-Cols,Triplets):-
+  maplist(term2tab,Tss,Lss),
+  findall(t(I,L,V),(nth0(I,Lss,Ls),member(L-V,Ls)),Triplets),
+  findall(L,member(t(_,L,_),Triplets),Ls),
+  sort(Ls,Cs),
+  length(Tss,Rows),
+  length(Cs,Cols).
+
+ttt:-
+  consult('data/facts.pro'),
+  findall(F,at(_,_,_,F,_),Fs),
+  terms2table(Fs,Dim,Table),
+  ppp(Table),
+  ppp(Dim).
+
+
+
 %%%%%%%%%%
 
 % term to vectors: DF positions + symbols reached
