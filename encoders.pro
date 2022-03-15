@@ -28,9 +28,11 @@ etest:-
 
 %%%%
 
+
 term2tab(T,Tabs):-
   term2paths(T,Pss),
   maplist(split_path,Pss,Tabs).
+
 
 split_path(Ps,Label-Val):-
   Sep='v',
@@ -59,13 +61,83 @@ terms2table(Tss,Rows-Cols,Triplets):-
   length(Tss,Rows),
   length(Cs,Cols).
 
-ttt:-
-  consult('data/facts.pro'),
+
+file2triplets(FN):-
+  ( file2triplets(FN,T),
+    assertz(T),
+    fail
+  ;
+    dims(D),
+    writeln('dims':D),
+    assertz(D),
+    tell('data/triplets.pro'),
+    listing(counts/3),
+    listing(t/3),
+    told
+  ).
+
+file2triplets(FN,t(I,L,V)):-
+   abolish(at/11),
+   abolish(t/3),
+   abolish(counts/3),
+   consult(FN),
+   at(I,_,_,F,_),
+   term2tab(F,LVs),
+   member(L-V,LVs).
+
+
+dims(counts(IC,IL,IV)):-
+  aggregate_all(count,distinct(I,t(I,_,_)),IC),
+  aggregate_all(count,distinct(L,t(_,L,_)),IL),
+  aggregate_all(count,distinct(V,t(_,_,V)),IV).
+
+
+
+file2tsv(FN):-
+   consult(FN),
+   tell('data/triplets.tsv'),
+   (
+     at(I,_,_,F,_),
+     term2path(F,Ps),
+     once(append(Ks,[V],Ps)),
+     join_with('v',Ks,Rs),
+     atomic_list_concat(Rs,Label),
+     join_with('\t',[I,Label,V],Ls),
+     atomic_list_concat(Ls,Line),
+     write(Line),nl,
+     fail
+  ; true
+  ),
+  told.
+
+
+tsv:-
+  file2tsv('data/facts.pro').
+
+big_tsv:-
+  file2tsv('data/big_facts.pro').
+
+
+tt:-file2triplets('data/big_facts.pro').
+
+tt1:-file2triplets('../TEXT_CRAFTS/StanzaGraphs/logic/OUTPUT_DIRECTORY/arxiv_all.pro').
+
+
+
+ttt(FN):-
+  abolish(at/11),
+  abolish(t/3),
+  abolish(counts/3),
+  consult(FN),
   findall(F,at(_,_,_,F,_),Fs),
-  terms2table(Fs,Dim,Table),
-  ppp(Table),
+  terms2table(Fs,Dim,_Table),
+  %ppp(Table),
   ppp(Dim).
 
+
+ttt:-ttt('data/facts.pro').
+
+ttt1:-ttt('../TEXT_CRAFTS/StanzaGraphs/logic/OUTPUT_DIRECTORY/arxiv_all.pro').
 
 
 %%%%%%%%%%

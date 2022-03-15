@@ -143,4 +143,5 @@ swift/tnf/tnf.xcodeproj
 out/*.txt
 .idea/*
 
+data/
 
