@@ -1,5 +1,7 @@
 from collections import defaultdict
 import csv
+from bloom_filter2 import BloomFilter
+
 import pprint
 
 
