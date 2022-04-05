@@ -17,6 +17,82 @@ argx(0,T,F):-functor(T,F,_).
 argx(I,T,F):-arg(I,T,F).
 
 
+% term to unifiable set of paths
+
+t2p(T,Pss):-t2p(T,[],Pss,[]).
+
+t2p(X,Ps)-->{atomic(X);var(X)},!,{reverse(Ps,Qs),append(Qs,X,Rs)},[Rs].
+t2p(T,Ps)-->{T=..Xs},t2ps(Xs,0,Ps).
+
+t2ps([],_,_)-->[].
+t2ps([X|Xs],N,Ps)-->{succ(N,SN)},t2p(X,[N|Ps]),t2ps(Xs,SN,Ps).
+
+
+c2ps((H:-Cs),cls(Head,Tail)):-
+   conj2list(Cs,Bs),
+   maplist(t2p,[H|Bs],Xsss),
+   append(Xsss,Tail,Head).
+
+
+
+conj2list(true,[]):-!.
+conj2list((X,Xs),[X|Ys]):-!,conj2list(Xs,Ys).
+conj2list(Last,[Last]).
+
+%% returns clauses in file, one at a time
+file2clause(F,C):-
+  seeing(S),
+  see(F),
+  repeat,
+    read(X),
+    ( X=end_of_file,!,see(F),seen,see(S),fail
+    ; C=X
+    ).
+
+file2ps(F):-
+   abolish(cls/2),
+   file2clause(F,Cs),
+   c2ps(Cs,Cls),
+   assertz(Cls),
+   fail
+ ; true.
+
+
+metaint(X):-write('>>>>'),portray_clause(X),fail.
+metaint([]).        % no more goals left, succeed
+metaint([G|Gs]):-   % unify the first goal with the head of a clause
+   %ppp(here=G),
+   cls([H|Bs],Gs),  % build a new list of goals from the body of the
+                    % clause extended with the remaining goals as tail
+   match_with_head(G,H),
+   metaint(Bs).     % interpret the extended body
+
+match_with_head(G,H):-
+  %write('#####'),portray_clause(G:-H),
+  maplist(match_each_in(H),G).
+
+match_each_in(Hs,G):-
+   memberchk(G,Hs),
+   write("@@@@@@"),ppp(G).
+
+meta(G):-
+  t2p(goal(G),Pss),
+  metaint([Pss]).
+
+tp2:-
+  file2ps('lamgen.pro'),
+  listing(cls/2),
+  writeln('---------'),
+  meta(G),
+  ppp(answer=G),
+  fail.
+
+tp1:-
+  T=f(a,[b,g(X,15,c)],X),
+  t2p(T,Pss),ppp(Pss),
+  ppp(T),
+  ppp(Pss).
+
 etest:-
   % assumes ground terms
   T=f(a,g(b,h(c),d),e),
