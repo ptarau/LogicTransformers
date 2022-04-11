@@ -23,12 +23,11 @@ def from_postfix(ws):
         if not isinstance(w, arity):
             stack.append(w)
         else:
-            k = int(w)
             xs = []
-            for _ in range(k):
+            for _ in range(w):
                 x = stack.pop()
                 xs.append(x)
-            stack.append(xs)
+            stack.append(tuple(xs))
     return stack.pop()
 
 

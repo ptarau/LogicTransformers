@@ -68,12 +68,12 @@ metaint([G|Gs]):-   % unify the first goal with the head of a clause
    metaint(Bs).     % interpret the extended body
 
 match_with_head(G,H):-
-  %write('#####'),portray_clause(G:-H),
-  maplist(match_each_in(H),G).
 
-match_each_in(Hs,G):-
-   memberchk(G,Hs),
-   write("@@@@@@"),ppp(G).
+  maplist(match_path(H),G),
+    write('#####'),ppp(G).
+
+match_path([H|_],G):-copy_term(H,HH),copy_term(HH,G),!.
+match_path([_|Hs],G):-match_path(Hs,G).
 
 meta(G):-
   t2p(goal(G),Pss),
