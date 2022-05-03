@@ -168,6 +168,42 @@ dims(counts(IC,IL,IV)):-
   aggregate_all(count,distinct(V,t(_,_,V)),IV).
 
 
+pro2nat(T):-
+   pro2nat(T,Ns,[]),
+   numbervars(Ns,0,_),
+   member(N,Ns),
+   write(N),write(' '),
+   fail
+   ;
+   write('.'),nl.
+
+pro2nat(A)-->{atomic(A)},!,[A].
+pro2nat(A)-->{var(A)},!,[A].
+pro2nat(Xs)-->{is_list(Xs)},!,list2nat(Xs).
+pro2nat(T)--> % compound(T),
+   {T=..Xs},
+   ['('],pro2nats(Xs),[')'].
+
+pro2nats([])-->[].
+pro2nats([X|Xs])--> pro2nat(X),pro2nats(Xs).
+
+list2nat([])-->['()'].
+list2nat([X|Xs])-->['('],pro2nat(X),list2nat(Xs),[')'].
+
+file2nat(In,Out):-
+   consult(In),
+   tell(Out),
+   (
+     at(_I,_,_,F,_),
+     pro2nat(F),
+     fail
+  ; true
+  ),
+  told.
+
+f2n:-
+  file2nat('data/facts.pro','data/facts.nat').
+
 
 file2tsv(FN):-
    consult(FN),
@@ -390,6 +426,11 @@ stest:-
   T=TT,
   sq(T),
   fail.
+
+
+p2n:-
+  pro2nat(f(a,b,g(X,[1,2,3],X),g(X,c,d))).
+
 
 /*
 
