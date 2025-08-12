@@ -9,7 +9,7 @@
 #define XCODE
 
 #ifdef XCODE
-static char* fname="/Users/tarau/Desktop/sit/LogicTransformers/out/tnf_asm.txt";
+static char* fname="/Users/tarau/sit/LogicTransformers/out/tnf_asm.txt";
 #else
 static char* fname="../../../out/tnf_asm.txt";
 #endif

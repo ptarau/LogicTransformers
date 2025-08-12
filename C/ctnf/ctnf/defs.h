@@ -6,7 +6,7 @@
 #include <string.h>
 #include <assert.h>
 
-static char* fname="/Users/tarau/Desktop/sit/LogicTransformers/out/tnf_asm.txt";
+static char* fname="/Users/tarau/sit/LogicTransformers/out/tnf_asm.txt";
 
 #define MAXHEAP (1L<<32)
 

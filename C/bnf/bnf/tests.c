@@ -13,7 +13,7 @@ void t3a() {
     istack ws=at(wss,i);
     term r=size(ws);
     for(term j=0;j<r;j++) {
-      printf("%s ",at(ws,j));
+      printf("%s ",(char *)at(ws,j));
     }
     printf("\n");
   }

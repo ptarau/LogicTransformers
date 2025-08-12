@@ -7,7 +7,7 @@
 #include <assert.h>
 
 //static char* fname="../../../out/bnf_asm.txt";
-static char* fname="/Users/tarau/Desktop/sit/LogicTransformers/out/bnf_asm.txt";
+static char* fname="/Users/tarau/sit/LogicTransformers/out/bnf_asm.txt";
 
 typedef unsigned long term;
 

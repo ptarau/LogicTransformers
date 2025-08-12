@@ -97,7 +97,7 @@ void px(term v0) {
   printf("v=%lu x=%lu t=%d\n",v,val(v),tag_of(v));
   
   if(ATOM==t) {
-    printf("ATOM %s",at(sids,x));
+    printf("ATOM %s",(char *)at(sids,x));
   }
   else if (VAR==t) {
     printf("_%lu",x);
@@ -133,7 +133,7 @@ void p0(term  v0,int k) {
     printf(")");
     break;
   case ATOM: {
-    printf("%s",at(sids,x));
+    printf("%s",(char *)at(sids,x));
     //printf("%s%lu:","#",x);
   }
     break;

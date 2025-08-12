@@ -145,3 +145,16 @@ out/*.txt
 
 data/
 
+C/bnf/bnf/tmp.txt
+C/tnf/tnf/tmp.txt
+C/ctnf/ctnf/tmp.txt
+
+swift/tnf/tnf/*.txt
+swift/tnf/tnf/tnf
+
+nlp.py
+
+.vscode
+
+
+
