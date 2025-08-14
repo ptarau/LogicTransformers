@@ -1,0 +1,7 @@
+A B a $ $ :- A A B c $ $ b $ $ $
+ccc4 A a $ $ :- A $
+ccc1 A b $ $ :- A $
+ccc2 A b $ $ :- A $
+ccc3 A b $ $ :- A $
+ccc2 A c $ $ :- A $
+A B goal $ $ :- A B a $ $ $

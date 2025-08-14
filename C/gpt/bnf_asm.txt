@@ -1,0 +1,12 @@
+A B sudoku $ $ :- C C A D [|] $ $ C B fill_out_blocks $ $ eq $ $ $ s4x4 $ $ $
+[] A fill_out_rows $ $ :- A $
+A B [|] $ $ C fill_out_rows $ $ :- 1 2 3 4 [] [|] $ $ [|] $ $ [|] $ $ [|] $ $ A B C fill_out_rows $ $ permute $ $ $ $
+[] A fill_out_blocks $ $ :- A $
+A B [|] $ $ C fill_out_blocks $ $ :- A B C fill_out_blocks $ $ fill_out_rows $ $ $
+A A B eq $ $ $ :- B $
+A B C D [] [|] $ $ [|] $ $ [|] $ $ [|] $ $ E F G H [] [|] $ $ [|] $ $ [|] $ $ [|] $ $ I J K L [] [|] $ $ [|] $ $ [|] $ $ [|] $ $ M N O P [] [|] $ $ [|] $ $ [|] $ $ [|] $ $ [] [|] $ $ [|] $ $ [|] $ $ [|] $ $ A E I M [] [|] $ $ [|] $ $ [|] $ $ [|] $ $ B F J N [] [|] $ $ [|] $ $ [|] $ $ [|] $ $ C G K O [] [|] $ $ [|] $ $ [|] $ $ [|] $ $ D H L P [] [|] $ $ [|] $ $ [|] $ $ [|] $ $ [] [|] $ $ [|] $ $ [|] $ $ [|] $ $ A B E F [] [|] $ $ [|] $ $ [|] $ $ [|] $ $ C D G H [] [|] $ $ [|] $ $ [|] $ $ [|] $ $ I J M N [] [|] $ $ [|] $ $ [|] $ $ [|] $ $ K L O P [] [|] $ $ [|] $ $ [|] $ $ [|] $ $ [] [|] $ $ [|] $ $ [|] $ $ [|] $ $ [] [|] $ $ [|] $ $ [|] $ $ Q s4x4 $ $ :- Q $
+[] [] A permute $ $ $ :- A $
+A B [|] $ $ C D permute $ $ $ :- B E A E C D ins $ $ $ $ permute $ $ $ $
+A B A B [|] $ $ C ins $ $ $ $ :- C $
+A B C [|] $ $ B D [|] $ $ E ins $ $ $ $ :- A C D E ins $ $ $ $ $
+A B goal $ $ :- A B sudoku $ $ $

@@ -1,0 +1,1 @@
+cc -O3 -std=c11 -Wall -Wextra -o bnf prolog_vm.c

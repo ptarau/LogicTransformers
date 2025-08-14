@@ -1,0 +1,8 @@
+A B goal $ $ :- 1 2 3 4 5 6 7 8 9 10 [] [|] $ $ [|] $ $ [|] $ $ [|] $ $ [|] $ $ [|] $ $ [|] $ $ [|] $ $ [|] $ $ [|] $ $ A B qs $ $ $ $
+A B C qs $ $ $ :- A B A B D E C place_queens $ $ $ $ $ gen_places $ $ $ $
+[] [] A gen_places $ $ $ :- A $
+A B [|] $ $ C D [|] $ $ E gen_places $ $ $ :- B D E gen_places $ $ $ $
+A A B [|] $ $ A C [|] $ $ A D [|] $ $ E place_queen $ $ $ $ $ :- E $
+A B C [|] $ $ D E [|] $ $ F G [|] $ $ H place_queen $ $ $ $ $ :- A C E G H place_queen $ $ $ $ $ $
+[] A B C D place_queens $ $ $ $ $ :- D $
+A B [|] $ $ C D E F [|] $ $ G place_queens $ $ $ $ $ :- B C H D [|] $ $ F A C D F G place_queen $ $ $ $ $ place_queens $ $ $ $ $ $
