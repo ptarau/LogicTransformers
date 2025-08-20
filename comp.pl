@@ -2,10 +2,10 @@
 
 
 go:-
-   Inp=('progs/arith.pro',
+   Inp='progs/arith.pro',
    Outp='out/arith_bnf_asm.txt',
    to_basm(Inp,Outp),
-   shell('python3 bnf.py arith_bnf_asm.txt').
+   shell('python3 bnf.py out/arith_bnf_asm.txt').
    
 show:-
   show_bnf('progs/queens.pro').
