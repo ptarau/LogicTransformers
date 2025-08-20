@@ -1,11 +1,11 @@
-'''
+"""
 import numpy as np
 
 heap=np.zeros(2**16,dtype=int)
 htop=0
-'''
+"""
 
-'''
+"""
 # todo, maybe
 class VM:
     def __init__(self):
@@ -26,7 +26,8 @@ class VM:
             self.syms[s] = i
             self.sids.append(s)
             return i
-'''
+"""
+import sys
 
 heap = []
 
@@ -35,7 +36,8 @@ sids = []
 
 
 def sym(s):
-    if s in syms: return syms[s]
+    if s in syms:
+        return syms[s]
     i = len(sids)
     syms[s] = i
     sids.append(s)
@@ -56,25 +58,27 @@ def pair(x, y):
     return h, PAIR
 
 
-def left(p): return heap[p]
+def left(p):
+    return heap[p]
 
 
-def right(p): return heap[p + 1]
+def right(p):
+    return heap[p + 1]
 
 
 class cls:
     def __init__(self, c, begin, end):
-        self.begin = begin;
-        self.end = end;
-        self.c = c;
+        self.begin = begin
+        self.end = end
+        self.c = c
 
     def __repr__(self):
-        return 'cls(' + str(self.c) + '\t' + str(self.begin) + ":" + str(self.end) + ')'
+        return "cls(" + str(self.c) + "\t" + str(self.begin) + ":" + str(self.end) + ")"
 
 
-def load_iltp():
+def load_iltp(fname):
     ts = []
-    with open('out/bnf_asm.txt', 'r') as f:
+    with open(fname, "r") as f:
         for line in f:
             begin = len(heap)
             toks = line[:-1].split()
@@ -82,8 +86,8 @@ def load_iltp():
             end = len(heap)
             clause = cls(tree, begin, end)
 
-            print('CLS:', p(tree))
-            print('LINE:', line)
+            print("CLS:", p(tree))
+            print("LINE:", line)
 
             ts.append(clause)
             vids = dict()
@@ -105,7 +109,8 @@ def stack2tree(postfix):
     vars = dict()
 
     def tovar(x):
-        if isinstance(x, tuple): return x
+        if isinstance(x, tuple):
+            return x
         if x[0].isupper():
             if x in vars:
                 v = vars[x]
@@ -149,7 +154,7 @@ def deref(o):
                 assert VAR == tv
                 return o
             if VAR == tv and v > x:
-                print('DEREF:', v, '>', x)
+                print("DEREF:", v, ">", x)
                 assert v < x
             o = v, tv
 
@@ -170,16 +175,20 @@ def unify(x, y, trail, htop):
         elif VAR == t1 and VAR == t2:
             if x1 > x2:
                 set_val(x1, (x2, t2))
-                if x1 < htop: trail.append(x1)
+                if x1 < htop:
+                    trail.append(x1)
             else:
                 set_val(x2, (x1, t1))
-                if x2 < htop: trail.append(x2)
+                if x2 < htop:
+                    trail.append(x2)
         elif VAR == t1:
             set_val(x1, (x2, t2))
-            if x1 < htop: trail.append(x1)
+            if x1 < htop:
+                trail.append(x1)
         elif VAR == t2:
             set_val(x2, (x1, t1))
-            if x2 < htop: trail.append(x2)
+            if x2 < htop:
+                trail.append(x2)
         elif t1 != t2:
             return False
         elif t1 == CONST:
@@ -211,7 +220,7 @@ def trim_heap(htop):
 
 
 def get_goal():
-    goal = atom('goal')
+    goal = atom("goal")
     cont = (len(heap), VAR)
     p = pair(cont, goal)
     answer = (len(heap), VAR)
@@ -223,7 +232,8 @@ def activate(G, clause, trail, ttop, htop):
 
     ok = unify(left(hb), G, trail, htop)
     unwind(trail, ttop)
-    if not ok: return False
+    if not ok:
+        return False
 
     begin = clause.begin
     end = clause.end
@@ -275,29 +285,32 @@ def step(G, code, trail, goal, i):
 
 
 # code interpreter
-def interp():
+def interp(fname):
     goal = get_goal()
-    code = load_iltp()
+    code = load_iltp(fname)
     # pc(code)
     l = len(code)
     trail = []
     todo = [(DO, (goal, None), 0, len(heap), l)]
 
-    while (todo):
+    while todo:
         op, G, ttop, htop, i = todo.pop()
         if DO == op:
             (NewG, OldG) = G
-            if i < l: ensure_undo(OldG, todo, ttop, htop, i, l);
+            if i < l:
+                ensure_undo(OldG, todo, ttop, htop, i, l)
             todo.append(step(NewG, code, trail, goal, 0))
 
         elif DONE == op:
             # yield p(answer)
-            if i < l: ensure_undo(G, todo, ttop, htop, i, l)
+            if i < l:
+                ensure_undo(G, todo, ttop, htop, i, l)
 
         elif UNDO == op:
             unwind(trail, ttop)
             trim_heap(htop)
-            if i < l: todo.append(step(G, code, trail, goal, i))
+            if i < l:
+                todo.append(step(G, code, trail, goal, i))
 
         else:  # FAIL == op:
             pass
@@ -314,10 +327,15 @@ def ensure_undo(G, todo, ttop, htop, i, l):
 
 
 def go():
-    interp()
+    if len(sys.argv) < 2:
+        fname = "out/bnf_asm.txt"
+    else:
+        fname = sys.argv[1]
+    interp(fname)
 
 
 ### -- HELPERS, IO
+
 
 def p(o):
     x, t = deref(o)
@@ -341,23 +359,25 @@ def nl():
 
 
 def ph(begin=0, end=0):
-    if end == 0: end = len(heap)
+    if end == 0:
+        end = len(heap)
     print("HEAP:", begin, "-->", end)
     assert end > 0
     for i in range(begin, end):
-        print(i, ':', end=" ")
+        print(i, ":", end=" ")
         pp(heap[i])
-    print('----------')
+    print("----------")
 
 
 def pt(trail, begin=0, end=0):
-    if end == 0: end = len(trail)
+    if end == 0:
+        end = len(trail)
     print("TRAIL:", begin, "-->", end)
     # assert end>0
     for i in range(begin, end):
-        print(i, ':', end=" ")
+        print(i, ":", end=" ")
         pp((trail[i], VAR))
-    print('----------')
+    print("----------")
 
 
 def phb(c):
@@ -372,13 +392,14 @@ def pc(code):
     print("CLAUSES:")
     for i, clause in enumerate(code):
         s = phb(clause.c)
-        print(i, ':', s, '\t', clause.begin, ':', clause.end)
+        print(i, ":", s, "\t", clause.begin, ":", clause.end)
     print("----------")
 
 
 def iron(a, size=200):
     def iron0(a, k):
-        if k <= 0: return ".?."
+        if k <= 0:
+            return ".?."
         x, t = deref(a)
         if t == PAIR:
             u, v = left(x), right(x)

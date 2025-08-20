@@ -193,8 +193,30 @@ hgo:-
   hasm('progs/plain.pro','out/hasm.txt').
 
 
+t2b(T,B):-var(T),!,B=T.
+t2b(T,B):-atomic(T),!,B=T.
+t2b(T,B):-T=..[F|Xs],ts2b(Xs,F,B).
 
+ts2b([],X,B):-t2b(X,B).
+ts2b([Y|Xs],X,A=>B):-
+   t2b(X,A),
+   ts2b(Xs,Y,B).
 
+b2t(B,T):-var(B),!,T=B.
+b2t(B,T):-atomic(B),!,T=B.
+b2t(F=>B,T):-b2ts(B,Ts,X),T=..[F,X|Ts].
+
+b2ts(B,[],T):-var(B),!,T=B.
+b2ts(A=>B,[Y|Xs],X):-!,b2t(A,X),b2ts(B,Xs,Y).
+b2ts(B,[],T):-b2t(B,T).
+  
+/*
+ambiguity if last arg is compound
+
+???
+f(a,g(b)) --> f(a,V),eq(V,g(b)) -->f(a,V),eq(V,g=>b)
+f(a,g(b(c))) --> f(a,V),eq(V,g(b(c))) --> f(a,V),eq(V,g=>U),eq(U,b(v))
+*/
 
 %% binarized implicational normal form
 to_bnf((H:-Bs),(HI:-BI) ):-
