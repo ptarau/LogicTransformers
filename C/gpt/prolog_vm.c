@@ -508,7 +508,7 @@ int main(int argc, char**argv){
     syms_init(&SYMS, 1024);
     LISTCONS_ID = sym_intern("[|]"); // for list detection
     prog_init(&PROG);
-    const char*path=(argc>=2)? argv[1] : "bnf_asm.txt";
+    const char*path=(argc>=2)? argv[1] : "../../out/bnf_asm.txt";
     load_program(path);
     run_engine();
     // cleanup

@@ -1,4 +1,4 @@
-goal(done):-all_permutations([1,2,3,4,5,6,7,8,9],_Ps).
+goal(done):-all_permutations([0,1,2,3,4,5,6,7,8,9],_Ps).
 
 all_permutations([],[[]]).
 all_permutations([X|Xs],Perms2):-

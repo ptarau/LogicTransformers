@@ -1,56 +1,89 @@
 :-op(100,xfy,('=>')).
 
+co:-
+   Inp='progs/allperms.pro',
+   Outp='out/bnf_asm.txt',
+   to_basm(Inp,Outp).
 
 go:-
-   Inp='progs/arith.pro',
-   Outp='out/arith_bnf_asm.txt',
-   to_basm(Inp,Outp),
-   shell('python3 bnf.py out/arith_bnf_asm.txt').
-   
+   co,
+   shell('time python3 bnf.py out/bnf_asm.txt').
+
+bgo:-
+   co,
+   shell('time C/bnf/bnf/bnf out/bnf_asm.txt').
+
+cgo:-
+   co,
+   shell('time C/gpt/bnf out/bnf_asm.txt').
+
+
 show:-
-  show_bnf('progs/queens.pro').
+  show_bnf('progs/arith.pro').
 
 %% to "assembler"
-to_basm(F,CF):-
-  tell(CF),
+to_basm(F,OutF):-
+  open(OutF,write,CF),
   run((
     file2clause(F,C),
     cls2bnf(C,(H:-B)),
     to_postfix(H,PostFixsH),
     to_postfix(B,PostFixsB),
-    append([PostFixsH,[(:-)|PostFixsB],['$']],PostFixs),
+    app2([PostFixsH,[(:-)|PostFixsB],['$']],PostFixs),
     %to_postfix((H=>B),PostFixs),
     numbervars(PostFixs,0,_),
     [First|Xs]=PostFixs,
-    write(First),
+    write(CF,First),
     run((
        member(X,Xs),
-       write(' '),
-       write(X)
+       write(CF,' '),
+       write(CF,X)
     )),
-    nl
+    nl(CF)
   )),
-  told.
+  close(CF).
 
+app2([],[]).
+app2([Xs|Xss],Ys):-
+    app2(Xss,Zs),
+    append(Xs,Zs,Ys).
 
 show_bnf(F):-
    run((
      file2clause(F,C),
+     show_clause(C),
      cls2bnf(C,BNF),
-     portray_clause(BNF),
+     write('\\  /'),nl,
+     write(' \\/'),nl,
+     clausify(C,CC),
+     to_bin(CC,B),
+     show_clause(B),
+      write('\\  /'),nl,
+     write(' \\/'),nl,
+     show_clause(BNF),
+     write('-------------'),nl,nl,
      nl
    )).
 
-%% returns clauses in file, one at a time
-file2clause(F,C):-
-  seeing(S),
-  see(F),
-  repeat,
-    read(X),
-    ( X=end_of_file,!,see(F),seen,see(S),fail
-    ; C=X
+show_clause(C):-write(C),write('.'),nl.
+
+%% file2clause(+File, -Clause)
+%% True on backtracking for each term read from File, then fails at EOF.
+file2clause(File, Clause) :- 
+      open(File, read, In),
+      read_terms_(In, Clause).
+
+% Internal generator that reads successive terms from a stream.
+read_terms_(In, Clause) :-
+    read_term(In, T, []),
+    ( T == end_of_file ->
+        !, close(In), fail                      % stop the generator at EOF
+    ; Clause = T                     % yield the current term
     ).
-    
+read_terms_(In, Clause) :-
+    read_terms_(In, Clause).         % on backtracking, read the next term
+
+
 cls2bnf(Cls,BNF):-
   clausify(Cls,(H:-Bs)),
   to_bnf((H:-Bs),BNF).
