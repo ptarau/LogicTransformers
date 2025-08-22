@@ -390,7 +390,7 @@ func interp(code:[[(String, Term, Term, Term)]]) {
 
 func go() {
   //let f="../../../out/tnf_asm.txt"
-  let f="/Users/tarau/Desktop/sit/LogicTransformers/out/tnf_asm.txt"
+  let f="/Users/tarau/sit/LogicTransformers/out/tnf_asm.txt"
   let code=file2code(fname:f)
   interp(code: code)
 }
