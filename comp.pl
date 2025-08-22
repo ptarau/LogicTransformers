@@ -65,7 +65,7 @@ show_bnf(F):-
      nl
    )).
 
-show_clause(C):-write(C),write('.'),nl.
+show_clause(C):-numbervars(C),write(C),write('.'),nl,fail;true.
 
 %% file2clause(+File, -Clause)
 %% True on backtracking for each term read from File, then fails at EOF.
