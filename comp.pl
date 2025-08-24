@@ -153,5 +153,3 @@ to_postfix(A)-->{var(A);atomic(A)},!,[A].
 to_postfix(A=>B)-->to_postfix(A),to_postfix(B),['$'].
 
 run(X):-X,fail;true.
-
-
