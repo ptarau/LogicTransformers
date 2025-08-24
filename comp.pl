@@ -69,19 +69,21 @@ show_clause(C):-numbervars(C),write(C),write('.'),nl,fail;true.
 
 %% file2clause(+File, -Clause)
 %% True on backtracking for each term read from File, then fails at EOF.
-file2clause(File, Clause) :- 
+file2clause(F,C):-file2clause(F,C,_).
+
+file2clause(File, Clause,Vs) :- 
       open(File, read, In),
-      read_terms_(In, Clause).
+      read_terms_(In, Clause,[variable_names(Vs)]).
 
 % Internal generator that reads successive terms from a stream.
-read_terms_(In, Clause) :-
-    read_term(In, T, []),
+read_terms_(In, Clause, Opts) :-
+    read_term(In, T, Opts),
     ( T == end_of_file ->
         !, close(In), fail                      % stop the generator at EOF
     ; Clause = T                     % yield the current term
     ).
-read_terms_(In, Clause) :-
-    read_terms_(In, Clause).         % on backtracking, read the next term
+read_terms_(In, Clause,Opts) :-
+    read_terms_(In, Clause,Opts).         % on backtracking, read the next term
 
 
 cls2bnf(Cls,BNF):-
@@ -153,3 +155,33 @@ to_postfix(A)-->{var(A);atomic(A)},!,[A].
 to_postfix(A=>B)-->to_postfix(A),to_postfix(B),['$'].
 
 run(X):-X,fail;true.
+
+to_bp(F,OutF):-
+  open(OutF,write,CF),
+  BC1=(bcall(X):-var(X),!),
+  BC2=(bcall(X):-call(X)),
+  portray_clause(CF,BC1),
+  portray_clause(CF,BC2),
+  run((
+    file2clause(F,C,Vs),
+    annotate(C,CC),
+    to_bin(CC,HB),
+    
+    writeln(HB+Vs),
+    show_clause(CF,HB,Vs)
+    
+  )),
+  close(CF).
+
+annotate((H:-B),R):-!,R=(H:-B).
+annotate(H,(H:-bcall)).
+
+show_clause(Stream,C,Vs):-
+  run((
+    maplist(call,Vs),
+    arg(1,C,H),functor(H,_,N),arg(N,H,'Cont_'),
+    write(Stream,C),write(Stream,'.'),nl(Stream)
+  )).
+
+b1:-
+   to_bp('progs/arith.pro','out/bp.pl').
