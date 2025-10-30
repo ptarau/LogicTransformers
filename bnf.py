@@ -413,4 +413,5 @@ def iron(a, size=200):
     return iron0(a, size)
 
 
-go()
+if __name__ == "__main__":
+    go()

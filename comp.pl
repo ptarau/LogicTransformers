@@ -1,7 +1,8 @@
 :-op(100,xfy,('=>')).
 
 co:-
-   Inp='progs/allperms.pro',
+   %Inp='progs/allperms.pro',
+   Inp='progs/queens.pro',
    Outp='out/bnf_asm.txt',
    to_basm(Inp,Outp).
 
